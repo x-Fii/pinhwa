@@ -2,36 +2,35 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription 
+} from '@/components/ui/sheet';
+import { 
+  Menu, 
+  X, 
+  Home, 
+  BookOpen, 
+  Building2, 
+  Trophy, 
+  Video, 
+  Contact, 
+  Newspaper,
+  GraduationCap,
+  ChevronDown,
+  Library,
+  ExternalLink
+} from 'lucide-react';
 import { NAVIGATION, isExternalLink, COLORS } from '@/lib/constants';
 
 // ============================================
 // Animation Variants
 // ============================================
-
-const sidebarVariants = {
-  hidden: {
-    x: -300,
-    opacity: 0,
-  },
-  visible: {
-    x: 0,
-    opacity: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 100,
-      damping: 20,
-    },
-  },
-  exit: {
-    x: -300,
-    opacity: 0,
-    transition: {
-      ease: 'easeInOut',
-      duration: 0.3,
-    },
-  },
-} as const;
 
 const linkContainerVariants = {
   hidden: { opacity: 0 },
@@ -70,12 +69,30 @@ const linkItemVariants = {
 } as const;
 
 // ============================================
+// Icon Mapping
+// ============================================
+
+const getIconForLabel = (label: string) => {
+  const lowerLabel = label.toLowerCase();
+  if (lowerLabel.includes('home')) return Home;
+  if (lowerLabel.includes('about') || lowerLabel.includes('badge') || lowerLabel.includes('history') || lowerLabel.includes('gallery')) return BookOpen;
+  if (lowerLabel.includes('administrative') || lowerLabel.includes('principal') || lowerLabel.includes('academic') || lowerLabel.includes('discipline') || lowerLabel.includes('counseling') || lowerLabel.includes('curricular') || lowerLabel.includes('sports') || lowerLabel.includes('general') || lowerLabel.includes('dormitory')) return Building2;
+  if (lowerLabel.includes('leadership') || lowerLabel.includes('honor') || lowerLabel.includes('habits') || lowerLabel.includes('expansion')) return Trophy;
+  if (lowerLabel.includes('video') || lowerLabel.includes('multimedia')) return Video;
+  if (lowerLabel.includes('contact')) return Contact;
+  if (lowerLabel.includes('news') || lowerLabel.includes('event') || lowerLabel.includes('campus') || lowerLabel.includes('report')) return Newspaper;
+  if (lowerLabel.includes('enrollment') || lowerLabel.includes('student')) return GraduationCap;
+  if (lowerLabel.includes('library') || lowerLabel.includes('ebook') || lowerLabel.includes('book')) return Library;
+  return ChevronDown;
+};
+
+// ============================================
 // Types
 // ============================================
 
 interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 // ============================================
@@ -97,6 +114,8 @@ function NavLinkItem({
   const [isExpanded, setIsExpanded] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
   const isExternal = item.isExternal || isExternalLink(item.href);
+  
+  const IconComponent = getIconForLabel(item.label);
 
   const handleClick = () => {
     if (hasChildren) {
@@ -114,7 +133,7 @@ function NavLinkItem({
       animate="visible"
       whileHover="hover"
       className={`
-        flex items-center justify-between w-full px-4 py-3 
+        flex items-center gap-3 w-full px-4 py-3 
         text-white text-sm font-medium rounded-md
         cursor-pointer transition-colors
         ${depth > 0 ? 'ml-4' : ''}
@@ -124,15 +143,19 @@ function NavLinkItem({
       }}
       onClick={handleClick}
     >
-      <span>{item.label}</span>
+      <IconComponent className="w-5 h-5 flex-shrink-0" />
+      <span className="flex-1">{item.label}</span>
       {hasChildren && (
         <motion.span
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ duration: 0.2 }}
           className="ml-2"
         >
-          ▼
+          <ChevronDown className="w-4 h-4" />
         </motion.span>
+      )}
+      {isExternal && !hasChildren && (
+        <ExternalLink className="w-4 h-4 ml-2" />
       )}
     </motion.div>
   );
@@ -159,92 +182,80 @@ function NavLinkItem({
       )}
       
       {/* Sub-menu */}
-      <AnimatePresence>
-        {hasChildren && isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden mt-1"
-          >
-            {item.children!.map((child, index) => (
-              <NavLinkItem key={index} item={child} depth={depth + 1} />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {hasChildren && isExpanded && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+          className="overflow-hidden mt-1"
+        >
+          {item.children!.map((child, index) => (
+            <NavLinkItem key={index} item={child} depth={depth + 1} />
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }
 
 /**
- * Sidebar Component
+ * Sidebar Component with shadcn/ui Sheet
  */
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onOpenChange }: SidebarProps) {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  
+  // Handle controlled/uncontrolled modes
+  const open = isOpen !== undefined ? isOpen : isSheetOpen;
+  const onOpen = onOpenChange || setIsSheetOpen;
+  
+  const handleOpenChange = (newOpen: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(newOpen);
+    } else {
+      setIsSheetOpen(newOpen);
+    }
+  };
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetTrigger>
+        <button
+          className="p-2 rounded-md hover:bg-primary/10 transition-colors"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="w-6 h-6 text-[#003366]" />
+        </button>
+      </SheetTrigger>
+      
+      <SheetContent 
+        side="left" 
+        className="w-[300px] sm:w-[350px] p-0"
+        style={{ backgroundColor: COLORS.primary }}
+      >
+        <SheetHeader className="p-4 border-b border-white/20">
+          <SheetTitle className="text-xl font-bold text-white">
+            导航 | Navigation
+          </SheetTitle>
+          <SheetDescription className="text-white/70">
+            Select a page to navigate
+          </SheetDescription>
+        </SheetHeader>
+        
+        {/* Navigation Links */}
+        <nav className="p-4 overflow-y-auto h-[calc(100vh-120px)]">
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black z-40"
-            onClick={onClose}
-          />
-          
-          {/* Sidebar Panel */}
-          <motion.aside
-            variants={sidebarVariants}
+            variants={linkContainerVariants}
             initial="hidden"
             animate="visible"
-            exit="exit"
-            className="fixed top-0 left-0 h-full w-72 z-50 shadow-xl"
-            style={{ backgroundColor: COLORS.primary }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/20">
-              <h2 className="text-xl font-bold text-white">Navigation</h2>
-              <button
-                onClick={onClose}
-                className="p-2 text-white hover:bg-white/10 rounded-md transition-colors"
-                aria-label="Close sidebar"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-            
-            {/* Navigation Links */}
-            <nav className="p-4 overflow-y-auto h-[calc(100vh-80px)]">
-              <motion.div
-                variants={linkContainerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                {NAVIGATION.map((item, index) => (
-                  <NavLinkItem key={index} item={item} />
-                ))}
-              </motion.div>
-            </nav>
-          </motion.aside>
-        </>
-      )}
-    </AnimatePresence>
+            {NAVIGATION.map((item, index) => (
+              <NavLinkItem key={index} item={item} />
+            ))}
+          </motion.div>
+        </nav>
+      </SheetContent>
+    </Sheet>
   );
 }
 

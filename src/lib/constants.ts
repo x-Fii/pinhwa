@@ -222,7 +222,7 @@ export const COLORS = {
   primary: '#003366',
   primaryDark: '#001a33',
   primaryLight: '#004d99',
-  accent: '#c41e3a', // Red accent
+  accent: '#CC0000', // Pin Hwa Red - updated from #c41e3a
   white: '#ffffff',
   gray: {
     50: '#f9fafb',

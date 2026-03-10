@@ -2,6 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 
 // ============================================
 // Session Storage Key
@@ -26,7 +35,7 @@ interface MarketingPopupProps {
 // Default Marketing Image
 // ============================================
 
-const DEFAULT_IMAGE = '/images/marketing-popup.jpg';
+const DEFAULT_IMAGE = '/images/marketing-popup.png';
 
 // ============================================
 // Component
@@ -69,61 +78,32 @@ export default function MarketingPopup({
     handleClose();
   };
 
-  // Don't render anything if popup is not open
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={handleClose}
-        aria-hidden="true"
-      />
-
-      {/* Modal Container */}
-      <div
-        className="relative z-10 bg-white rounded-lg shadow-2xl overflow-hidden"
-        style={{
-          width: `${width}px`,
-          maxWidth: '90vw',
-          height: 'auto',
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent 
+        className="p-0 overflow-hidden border-0"
+        style={{ 
+          maxWidth: `${width}px`,
+          width: '90vw'
         }}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="marketing-popup-title"
+        showCloseButton={true}
       >
-        {/* Close Button */}
+        {/* Close Button - Custom positioned */}
         <button
           onClick={handleClose}
-          className="absolute top-2 right-2 z-20 p-2 bg-white/80 hover:bg-white rounded-full transition-colors"
+          className="absolute top-3 right-3 z-20 p-2 bg-white/80 hover:bg-white rounded-full transition-colors shadow-md"
           aria-label="Close popup"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-800"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <X className="h-5 w-5 text-gray-800" />
         </button>
 
-        {/* Image */}
-        <div className="relative" style={{ aspectRatio: `${width}/${height}` }}>
+        {/* Image - Using object-contain to show full image, max-h for mobile */}
+        <div className="relative w-full bg-white/10 backdrop-blur-sm" style={{ aspectRatio: `${width}/${height}`, maxHeight: '80vh' }}>
           <Image
             src={imageSrc}
             alt={imageAlt}
             fill
-            className="object-cover"
+            className="object-contain"
             priority
             sizes="(max-width: 768px) 100vw, 400px"
           />
@@ -132,16 +112,16 @@ export default function MarketingPopup({
         {/* Optional Link Button */}
         {linkUrl && (
           <div className="p-4 bg-white">
-            <button
+            <Button
               onClick={handleLinkClick}
-              className="w-full py-3 px-6 bg-[#003366] hover:bg-[#001a33] text-white font-medium rounded-md transition-colors"
+              className="w-full bg-[#003366] hover:bg-[#001a33] text-white font-medium"
             >
               {linkText}
-            </button>
+            </Button>
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
