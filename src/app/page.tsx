@@ -227,34 +227,22 @@ export default function Home() {
             {/* Announcement */}
             <AnnouncementCard />
 
-            {/* 7 Habits Section with RevealCard Grid */}
-            <section>
-              <h2 className="text-2xl font-bold text-[#003366] mb-6 text-center">
-                7 Habits of Highly Effective People
-                <span className="block text-lg font-normal text-gray-600 mt-1">
-                  高效能人士的七个习惯
-                </span>
-              </h2>
-              
-              {/* Responsive Grid: 1 col mobile, 2 cols tablet, 3-4 cols desktop */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {HABITS.map((habit) => (
-                  <RevealCard
-                    key={habit.id}
-                    title={habit.title}
-                    subtitle={habit.subtitle}
-                    imageSrc={habit.imageSrc}
-                    href={habit.href}
-                  />
-                ))}
-              </div>
-              
-              {/* View All Link */}
-              <div className="mt-6 text-center">
-                <Link href="/leadership/habits">
-                  <Button variant="outline" className="text-[#003366] border-[#003366] hover:bg-[#003366] hover:text-white">
-                    View All 7 Habits →
-                  </Button>
+            {/* 7 Habits Section with Main Visual */}
+            <section>    
+              {/* Optimized GIF with wrapper */}
+              <div className="w-full max-w-6xl mx-auto my-8 px-4">
+                <Link href="/leadership/habits" className="block group">
+                  <div className="relative w-full rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-500 overflow-hidden">
+                    <Image
+                      src="/img/7habits/habit-all.gif"
+                      alt="7 Habits of Highly Effective People"
+                      width={1200}
+                      height={675}
+                      priority
+                      className="w-full h-auto bg-slate-50"
+                      sizes="(max-width: 768px) 100vw, 1200px"
+                    />
+                  </div>
                 </Link>
               </div>
             </section>
